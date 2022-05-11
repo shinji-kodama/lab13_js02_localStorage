@@ -6,16 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <style>
+    h1 {
+      text-align: center;
+    }
     html{
       background: rgb(241 245 249);
     }
     input {
+      display: block;
       background-color: rgb(248 250 252);
       border-radius: 5px;
       border-color: #aaa;
       border-width: 1px;
       padding: 4px 8px;
       width: 240px;
+      margin: 0 auto;
+      text-align: center;
     }
     textarea {
       resize: none;
@@ -47,8 +53,9 @@
       border: solid 0px gray;
       border-radius: 5px;
       background-color: rgb(248 250 222);
-      box-shadow: 7px 8px 22px 1px #777777;
+      box-shadow: 8px 8px 12px 1px #777777;
       border-radius: 10px;  
+      margin: 0 auto;
     }
     li > button {
       position: absolute;
@@ -63,7 +70,8 @@
   </style>
 </head>
 <body>
-<input type="text" id="txt">
+<h1>Sortable Todo List</h1>
+<input type="text" id="txt" placeholder="文字打って Enter">
 <ul id="view"></ul>
 <script>
 
@@ -82,6 +90,11 @@ document.getElementById('txt').addEventListener('keyup', event => {
   }
 })
 
+/**
+ * リストを表示する
+ * @return {void}
+ * @param {void}
+ */
 const showList = () => {
   const viewEl = document.getElementById('view')
   viewEl.innerHTML = ''
@@ -100,6 +113,12 @@ const showList = () => {
     addDragSort()
 }
 
+/**
+ * リストを追加する
+ * @return {HTMLLIElement} li
+ * @param {string} k
+ * @param {string} v
+ */
 const addLiEl = (k, v) => {
   const li = document.createElement('li')
   li.innerHTML = k + '. ' + JSON.parse(v).title
@@ -109,7 +128,12 @@ const addLiEl = (k, v) => {
   return li
 }
 
-const addDelBtn = (k) => {
+/**
+ * リストを削除するボタンを作成
+ * @return {HTMLButtonElement} btn
+ * @param {string} k
+ */
+const addDelBtn = k => {
   const del = document.createElement('button')
   del.innerHTML = '×'
   del.addEventListener('click', () => {
@@ -131,37 +155,52 @@ const addDelBtn = (k) => {
   return del
 }
 
+/**
+ * リスト上のテキストエリアを作成
+ * @return {HTMLTextAreaElement} textarea
+ * @param {string} k
+ * @param {string} v
+ */
 const addTextarea = (k, v) => {
   const body = document.createElement('textarea')
   body.value = JSON.parse(v).content
   body.setAttribute('rows',4 )
   body.addEventListener('input', () => {
     const data = JSON.parse(localStorage.getItem(k))
-    console.log(data)
     data.content = body.value
     localStorage.setItem(k, JSON.stringify(data))
   })
   return body
 }
 
+/**
+ * リストをドラッグして並び替え可能にする
+ * @return {void}
+ * @param {void}
+ */
 const addDragSort = () => {
-  document.querySelectorAll('li').forEach (el => {
+  document.querySelectorAll('li').forEach(el => {
     el.ondragstart = () => {
       event.dataTransfer.setData('text/plain', event.target.id + ',' + event.target.getAttribute('order'))
     }
-    el.ondrop = (e) => {
-      // event.preventDefault();
+    el.ondrop = e => {
       const [dragId, dragOrder] = event.dataTransfer.getData('text/plain').split(',');
       const targetOrder = e.target.parentElement.getAttribute('order')
       const targetId    = e.target.parentElement.id
-      
-      const dragData   = JSON.parse(localStorage.getItem(dragId))
-      const targetData = JSON.parse(localStorage.getItem(targetId))
-      dragData.order   = Number(targetOrder)
-      targetData.order = Number(dragOrder)
-      localStorage.setItem(dragId,   JSON.stringify(dragData))
-      localStorage.setItem(targetId, JSON.stringify(targetData))
 
+      Object
+        .entries(localStorage)
+        .forEach(([key, value]) => {
+          const data = JSON.parse(value)
+
+          localStorage.setItem(key, JSON.stringify({ 
+            order: dragOrder == data.order ? Number(targetOrder) :
+              dragOrder < data.order && data.order <= targetOrder ? data.order - 1 : 
+              targetOrder <= data.order && data.order < dragOrder ? data.order + 1 : data.order,
+            title: data.title,
+            content: data.content,
+          }))
+      })
       showList()
     };
   });
