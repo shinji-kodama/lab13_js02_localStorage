@@ -76,8 +76,10 @@
 <script>
 
 
-document.getElementById('txt').addEventListener('keyup', event => {
+document.getElementById('txt').addEventListener('keypress', event => {
+  if(event.isComposing) return
   if(event.key == 'Enter'){
+    console.log(event)
     const txt = document.getElementById('txt').value
     const index = localStorage.length ? Math.max(...Object.keys(localStorage)) + 1 : 0
     localStorage.setItem(index, JSON.stringify({
@@ -89,6 +91,7 @@ document.getElementById('txt').addEventListener('keyup', event => {
     document.getElementById('txt').value = ''
   }
 })
+
 
 /**
  * リストを表示する
@@ -125,6 +128,7 @@ const addLiEl = (k, v) => {
   li.setAttribute('id', k)
   li.setAttribute('order', JSON.parse(v).order)
   li.draggable = true
+
   return li
 }
 
@@ -205,6 +209,9 @@ const addDragSort = () => {
     };
   });
 } 
+
+
+// ここから実行
 
 showList();
 
