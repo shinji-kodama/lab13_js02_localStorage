@@ -185,11 +185,11 @@ const addTextarea = (k, v) => {
  */
 const addDragSort = () => {
   document.querySelectorAll('li').forEach(el => {
-    el.ondragstart = () => {
-      event.dataTransfer.setData('text/plain', event.target.id + ',' + event.target.getAttribute('order'))
+    el.ondragstart = e => {
+      e.dataTransfer.setData('text/plain', e.target.id + ',' + e.target.getAttribute('order'))
     }
     el.ondrop = e => {
-      const [dragId, dragOrder] = event.dataTransfer.getData('text/plain').split(',');
+      const [dragId, dragOrder] = e.dataTransfer.getData('text/plain').split(',');
       const targetOrder = e.target.parentElement.getAttribute('order')
       const targetId    = e.target.parentElement.id
 
@@ -199,9 +199,10 @@ const addDragSort = () => {
           const data = JSON.parse(value)
 
           localStorage.setItem(key, JSON.stringify({ 
-            order: dragOrder == data.order ? Number(targetOrder) :
-              dragOrder < data.order && data.order <= targetOrder ? data.order - 1 : 
-              targetOrder <= data.order && data.order < dragOrder ? data.order + 1 : data.order,
+            order: dragOrder == data.order ? Number(targetOrder) 
+              : dragOrder < data.order && data.order <= targetOrder ? data.order - 1 
+              : targetOrder <= data.order && data.order < dragOrder ? data.order + 1 
+              : data.order,
             title: data.title,
             content: data.content,
           }))
